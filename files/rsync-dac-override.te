@@ -1,0 +1,27 @@
+# Custom SELinux policy module to allow rsync dac_override capability.
+#
+# Background:
+#   The rsync systemd services run as root in the rsync_t SELinux domain.
+#   When syncing files owned by bblasco, rsync needs to create directories
+#   and modify file ownership on the destination, which requires bypassing
+#   DAC (Discretionary Access Control) checks via the dac_override capability.
+#   The rsync_full_access boolean covers NFS/remote access but does not grant
+#   dac_override, so a custom policy module is required.
+#
+# Derived from:
+#   Running the backup and capturing the AVC denial with:
+#     sudo ausearch -m avc -ts recent | audit2allow -M rsync-dac-override
+#
+#   audit2allow produced three rules, but two were marked:
+#     "#!!!! This avc is allowed in the current policy"
+#   meaning they are already covered by the existing Fedora SELinux policy.
+#   Only the dac_override rule below is genuinely new and required.
+
+module rsync-dac-override 1.0;
+
+require {
+    type rsync_t;
+    class capability dac_override;
+}
+
+allow rsync_t self:capability dac_override;

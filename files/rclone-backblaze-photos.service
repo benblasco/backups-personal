@@ -1,0 +1,7 @@
+[Unit]
+Description=Rclone sync photos to Backblaze
+RequiresMountsFor=/var/mnt/sg1
+
+[Service]
+Type=oneshot
+ExecStart=rclone sync /var/mnt/sg1/media/photos/ backblaze:eraser215-photos/photos/ --log-file=%h/rclone_logs/eraser215-photos.log --log-level=INFO --stats=0

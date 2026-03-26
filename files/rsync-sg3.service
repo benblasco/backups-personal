@@ -1,0 +1,9 @@
+[Unit]
+Description=Rsync backup from sg1 to sg3 (12TB WD)
+RequiresMountsFor=/var/mnt/sg1 /var/mnt/sg3
+
+[Service]
+Type=oneshot
+ExecStart=rsync -avh --delete-before /var/mnt/sg1/ /var/mnt/sg3/
+# StandardOutput=append:/var/log/rsync/sg3.log
+# StandardError=append:/var/log/rsync/sg3.log

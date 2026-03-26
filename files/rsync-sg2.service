@@ -1,0 +1,9 @@
+[Unit]
+Description=Rsync backup from sg1 to sg2 (NUC)
+RequiresMountsFor=/var/mnt/sg1 /var/mnt/sg2
+
+[Service]
+Type=oneshot
+ExecStart=rsync -avh --delete-before /var/mnt/sg1/ /var/mnt/sg2/
+# StandardOutput=append:/var/log/rsync/sg2.log
+# StandardError=append:/var/log/rsync/sg2.log

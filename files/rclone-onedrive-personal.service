@@ -1,0 +1,7 @@
+[Unit]
+Description=Rclone sync personal documents to OneDrive
+RequiresMountsFor=/var/mnt/sg1
+
+[Service]
+Type=oneshot
+ExecStart=rclone sync /var/mnt/sg1/eblaben_backup/personal/ onedrive:rclone_backup/personal/ --log-file=%h/rclone_logs/onedrive-personal.log --log-level=INFO --stats=0

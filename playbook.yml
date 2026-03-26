@@ -1,0 +1,173 @@
+---
+- name: Deploy personal backup systemd units
+  hosts: all
+  become: true
+
+  pre_tasks:
+    - name: Ensure rclone log directory exists
+      ansible.builtin.file:
+        path: /var/home/bblasco/rclone_logs
+        state: directory
+        owner: bblasco
+        group: bblasco
+        mode: "0755"
+
+    - name: Ensure rsync log directory exists
+      ansible.builtin.file:
+        path: /var/home/bblasco/rsync_logs
+        state: directory
+        owner: bblasco
+        group: bblasco
+        mode: "0755"
+
+    - name: Ensure rclone config directory exists
+      ansible.builtin.file:
+        path: /var/home/bblasco/.config/rclone
+        state: directory
+        owner: bblasco
+        group: bblasco
+        mode: "0700"
+
+    - name: Copy rclone configuration
+      ansible.builtin.copy:
+        src: rclone.conf
+        dest: /var/home/bblasco/.config/rclone/rclone.conf
+        owner: bblasco
+        group: bblasco
+        mode: "0600"
+
+    # SELinux booleans to allow rsync full access due to the following denials:
+    # type=AVC msg=audit(1774503754.720:626798): avc:  denied  { getattr } for  pid=362824 comm="rsync" path="/var/mnt/sg2" dev="0:77" ino=2 scontext=system_u:system_r:rsync_t:s0 tcontext=system_u:object_r:nfs_t:s0 tclass=dir permissive=0
+    # type=AVC msg=audit(1774503754.715:626794): avc:  denied  { search } for  pid=362822 comm="rsync" name="bblasco" dev="dm-5" ino=16777344 scontext=system_u:system_r:rsync_t:s0 tcontext=unconfined_u:object_r:user_home_dir_t:s0 tclass=dir permissive=0
+    # Note: These were found via the following command:
+    # sudo ausearch -m avc -ts recent | audit2why
+    - name: Set SELinux boolean to allow rsync full access
+      ansible.posix.seboolean:
+        name: rsync_full_access
+        state: true
+        persistent: true
+
+    # Custom SELinux policy module granting rsync_t the dac_override capability.
+    # Required because rsync runs as root in the rsync_t domain but source files
+    # are owned by bblasco — SELinux blocks the ownership checks even for root
+    # without this explicit allow rule. See files/rsync-dac-override.te for full
+    # derivation notes.
+    #
+    # Build approach: checkmodule + semodule_package (from checkpolicy and
+    # policycoreutils) rather than the make-based approach, which would require
+    # selinux-policy-devel. The checkpolicy/policycoreutils packages are core
+    # SELinux userspace tools expected to be present on any bootc image, whereas
+    # selinux-policy-devel is a development package that cannot be installed at
+    # runtime on an immutable bootc system.
+    # Reference: https://oneuptime.com/blog/post/2026-03-04-automate-selinux-policy-management-ansible/view
+    - name: Gather installed package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Verify checkpolicy is present
+      ansible.builtin.assert:
+        that: "'checkpolicy' in ansible_facts.packages"
+        fail_msg: >
+          checkpolicy is not installed and cannot be installed on this bootc
+          system at runtime. Rebuild the image with checkpolicy included, then
+          re-run the playbook.
+        success_msg: "checkpolicy is present, proceeding with policy module build."
+
+    - name: Verify policycoreutils is present
+      ansible.builtin.assert:
+        that: "'policycoreutils' in ansible_facts.packages"
+        fail_msg: >
+          policycoreutils is not installed and cannot be installed on this bootc
+          system at runtime. Rebuild the image with policycoreutils included,
+          then re-run the playbook.
+        success_msg: "policycoreutils is present, proceeding with policy module build."
+
+    - name: Copy rsync dac_override SELinux policy source
+      ansible.builtin.copy:
+        src: rsync-dac-override.te
+        dest: /tmp/rsync-dac-override.te
+        mode: "0644"
+
+    - name: Compile rsync dac_override SELinux policy to module file
+      ansible.builtin.command:
+        cmd: checkmodule -M -m -o /tmp/rsync-dac-override.mod /tmp/rsync-dac-override.te
+      changed_when: true
+
+    - name: Package rsync dac_override SELinux module into policy package
+      ansible.builtin.command:
+        cmd: semodule_package -o /tmp/rsync-dac-override.pp -m /tmp/rsync-dac-override.mod
+      changed_when: true
+
+    - name: Load rsync dac_override SELinux policy module
+      ansible.builtin.command:
+        cmd: semodule -i /tmp/rsync-dac-override.pp
+      changed_when: true
+
+    - name: Clean up SELinux policy build artefacts
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/rsync-dac-override.te
+        - /tmp/rsync-dac-override.mod
+        - /tmp/rsync-dac-override.pp
+
+  vars:
+    systemd_unit_files:
+      # Rclone user units (run as bblasco)
+      - item: rclone-backblaze-personal.service
+        user: bblasco
+      - item: rclone-backblaze-personal.timer
+        user: bblasco
+      - item: rclone-onedrive-personal.service
+        user: bblasco
+      - item: rclone-onedrive-personal.timer
+        user: bblasco
+      - item: rclone-backblaze-photos.service
+        user: bblasco
+      - item: rclone-backblaze-photos.timer
+        user: bblasco
+      - item: rclone-onedrive-photos.service
+        user: bblasco
+      - item: rclone-onedrive-photos.timer
+        user: bblasco
+      # Rsync system units (run as root)
+      - item: rsync-sg2.service
+        user: root
+      - item: rsync-sg2.timer
+        user: root
+      - item: rsync-sg3.service
+        user: root
+      - item: rsync-sg3.timer
+        user: root
+
+    systemd_enabled_units:
+      - item: rclone-backblaze-personal.timer
+        user: bblasco
+      - item: rclone-onedrive-personal.timer
+        user: bblasco
+      - item: rclone-backblaze-photos.timer
+        user: bblasco
+      - item: rclone-onedrive-photos.timer
+        user: bblasco
+      - item: rsync-sg2.timer
+        user: root
+      - item: rsync-sg3.timer
+        user: root
+
+    systemd_started_units:
+      - item: rclone-backblaze-personal.timer
+        user: bblasco
+      - item: rclone-onedrive-personal.timer
+        user: bblasco
+      - item: rclone-backblaze-photos.timer
+        user: bblasco
+      - item: rclone-onedrive-photos.timer
+        user: bblasco
+      - item: rsync-sg2.timer
+        user: root
+      - item: rsync-sg3.timer
+        user: root
+
+  roles:
+    - fedora.linux_system_roles.systemd

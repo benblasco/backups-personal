@@ -1,0 +1,9 @@
+[Unit]
+Description=Run OneDrive photos backup on Sunday at 01:00
+
+[Timer]
+OnCalendar=Sun *-*-* 01:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

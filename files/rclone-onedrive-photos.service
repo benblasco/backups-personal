@@ -1,0 +1,7 @@
+[Unit]
+Description=Rclone sync photos to OneDrive
+RequiresMountsFor=/var/mnt/sg1
+
+[Service]
+Type=oneshot
+ExecStart=rclone sync /var/mnt/sg1/media/photos/ onedrive:rclone_backup/photos/ --log-file=%h/rclone_logs/onedrive-photos.log --log-level=INFO --stats=0

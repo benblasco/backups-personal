@@ -1,0 +1,9 @@
+[Unit]
+Description=Run rsync backup from sg1 to sg2 on Tue, Thu, Sat at 03:00
+
+[Timer]
+OnCalendar=Tue,Thu,Sat *-*-* 03:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

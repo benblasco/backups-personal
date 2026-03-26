@@ -1,0 +1,7 @@
+[Unit]
+Description=Rclone sync personal documents to Backblaze
+RequiresMountsFor=/var/mnt/sg1
+
+[Service]
+Type=oneshot
+ExecStart=rclone sync /var/mnt/sg1/eblaben_backup/personal/ backblaze:eraser215-personal/personal/ --log-file=%h/rclone_logs/eraser215-personal.log --log-level=INFO --stats=0
