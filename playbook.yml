@@ -112,6 +112,30 @@
         - /tmp/rsync-dac-override.mod
         - /tmp/rsync-dac-override.pp
 
+    - name: Ensure /var/usrlocal/bin exists
+      ansible.builtin.file:
+        path: /var/usrlocal/bin
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Deploy rsync post-run notification script
+      ansible.builtin.template:
+        src: rsync-notify.sh.j2
+        dest: /var/usrlocal/bin/rsync-notify.sh
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Deploy rclone post-run notification script
+      ansible.builtin.template:
+        src: rclone-notify.sh.j2
+        dest: /var/usrlocal/bin/rclone-notify.sh
+        owner: root
+        group: root
+        mode: "0755"
+
   vars:
     systemd_unit_files:
       # Rclone user units (run as bblasco)
@@ -131,14 +155,17 @@
         user: bblasco
       - item: rclone-onedrive-photos.timer
         user: bblasco
-      # Rsync system units (run as root)
-      - item: rsync-sg2.service
-        user: root
+      # Rsync timers (static, run as root)
       - item: rsync-sg2.timer
         user: root
-      - item: rsync-sg3.service
-        user: root
       - item: rsync-sg3.timer
+        user: root
+
+    systemd_unit_file_templates:
+      # Rsync service templates (Jinja2, run as root) — contain webhook_url variable
+      - item: rsync-sg2.service.j2
+        user: root
+      - item: rsync-sg3.service.j2
         user: root
 
     systemd_enabled_units:

@@ -1,0 +1,20 @@
+#!/bin/bash
+# Source: https://github.com/benblasco/backups-personal
+#
+# Post-run notification script for rclone backup services.
+# Deployed to /var/usrlocal/bin/ (writable path on bootc systems).
+# Called from ExecStopPost in rclone-*.service units.
+# systemd injects SERVICE_RESULT and INVOCATION_ID into the environment.
+#
+# Usage: rclone-notify.sh <service-name> <log-file>
+
+SERVICE=$1
+LOGFILE=$2
+
+# Capture the last 4 lines of the rclone log (the stats summary block)
+OUTPUT=$(tail -n 4 "${LOGFILE}" 2>/dev/null | paste -s -d' ')
+MESSAGE="${SERVICE}: ${SERVICE_RESULT} | ${OUTPUT}"
+
+curl -sf -X POST "{{ webhook_url }}" \
+    -H "Content-Type: application/json" \
+    -d "{\"message\": \"${MESSAGE}\", \"number\": \"{{ signal_number }}\", \"recipients\": [\"{{ signal_group_id }}\"]}"

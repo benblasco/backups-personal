@@ -1,0 +1,18 @@
+#!/bin/bash
+# Source: https://github.com/benblasco/backups-personal
+#
+# Post-run notification script for rsync backup services.
+# Deployed to /var/usrlocal/bin/ (writable path on bootc systems).
+# Called from ExecStopPost in rsync-sg*.service units.
+# systemd injects SERVICE_RESULT and INVOCATION_ID into the environment.
+#
+# Usage: rsync-notify.sh <service-name>
+
+SERVICE=$1
+OUTPUT=$(journalctl _SYSTEMD_INVOCATION_ID="${INVOCATION_ID}" -n 2 \
+    --no-pager --output=cat 2>/dev/null | paste -s -d' ')
+MESSAGE="${SERVICE}: ${SERVICE_RESULT} | ${OUTPUT}"
+
+curl -sf -X POST "{{ webhook_url }}" \
+    -H "Content-Type: application/json" \
+    -d "{\"message\": \"${MESSAGE}\", \"number\": \"{{ signal_number }}\", \"recipients\": [\"{{ signal_group_id }}\"]}"

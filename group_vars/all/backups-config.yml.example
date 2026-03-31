@@ -1,0 +1,6 @@
+---
+# Copy this file to backups-config.yml and set real values.
+# backups-config.yml is gitignored to prevent committing live credentials.
+webhook_url: "http://your-host:9922/v2/send"
+signal_number: "+1234567890"
+signal_group_id: "your-group-id-here"

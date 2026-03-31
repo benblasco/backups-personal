@@ -1,7 +1,9 @@
+# Source: https://github.com/benblasco/backups-personal
 [Unit]
 Description=Rclone sync photos to Backblaze
 RequiresMountsFor=/var/mnt/sg1
 
 [Service]
 Type=oneshot
-ExecStart=rclone sync /var/mnt/sg1/media/photos/ backblaze:eraser215-photos/photos/ --log-file=%h/rclone_logs/eraser215-photos.log --log-level=INFO --stats=0
+ExecStart=rclone sync /var/mnt/sg1/media/photos/ backblaze:eraser215-photos/photos/ --log-file=%h/rclone_logs/backblaze-photos.log --log-level=INFO --stats-log-level NOTICE
+ExecStopPost=/var/usrlocal/bin/rclone-notify.sh rclone-backblaze-photos %h/rclone_logs/backblaze-photos.log

@@ -1,7 +1,9 @@
+# Source: https://github.com/benblasco/backups-personal
 [Unit]
 Description=Rclone sync personal documents to Backblaze
 RequiresMountsFor=/var/mnt/sg1
 
 [Service]
 Type=oneshot
-ExecStart=rclone sync /var/mnt/sg1/eblaben_backup/personal/ backblaze:eraser215-personal/personal/ --log-file=%h/rclone_logs/eraser215-personal.log --log-level=INFO --stats=0
+ExecStart=rclone sync /var/mnt/sg1/eblaben_backup/personal/ backblaze:eraser215-personal/personal/ --log-file=%h/rclone_logs/backblaze-personal.log --log-level=INFO --stats-log-level NOTICE
+ExecStopPost=/var/usrlocal/bin/rclone-notify.sh rclone-backblaze-personal %h/rclone_logs/backblaze-personal.log

@@ -1,3 +1,4 @@
+# Source: https://github.com/benblasco/backups-personal
 [Unit]
 Description=Rsync backup from sg1 to sg2 (NUC)
 RequiresMountsFor=/var/mnt/sg1 /var/mnt/sg2
@@ -7,3 +8,4 @@ Type=oneshot
 ExecStart=rsync -avh --delete-before /var/mnt/sg1/ /var/mnt/sg2/
 # StandardOutput=append:/var/log/rsync/sg2.log
 # StandardError=append:/var/log/rsync/sg2.log
+ExecStopPost=/var/usrlocal/bin/rsync-notify.sh rsync-sg2
