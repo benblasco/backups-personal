@@ -15,6 +15,11 @@ LOGFILE=$2
 OUTPUT=$(tail -n 4 "${LOGFILE}" 2>/dev/null | paste -s -d' ')
 MESSAGE="${SERVICE}: ${SERVICE_RESULT} | ${OUTPUT}"
 
-curl -sf -X POST "{{ webhook_url }}" \
+jq -n \
+    --arg msg "$MESSAGE" \
+    --arg num "{{ signal_number }}" \
+    --arg rid "{{ signal_group_id }}" \
+    '{message: $msg, number: $num, recipients: [$rid]}' \
+| curl -sf -X POST "{{ webhook_url }}" \
     -H "Content-Type: application/json" \
-    -d "{\"message\": \"${MESSAGE}\", \"number\": \"{{ signal_number }}\", \"recipients\": [\"{{ signal_group_id }}\"]}"
+    -d @-
