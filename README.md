@@ -14,15 +14,14 @@ ansible-playbook -i inventory.yml playbook.yml
 
 All backups run as systemd timers. Cloud rclone-based backups ensure that sg1 is mounted before running the backup. Local rsync based backups ensure that sg1, sg2, and sg3 are all mounted before running the backup.
 
-### Rclone
-- Backblaze personal backups at 01:00 on Tue, Thu, and Sat
-- Onedrive personal backups at 01:00 on Mon, Wed, and Fri
-- Backblaze photo backups at 02:00 on Sun
-- Onedrive photo backups at 01:00 on Sun
-
-### Rsync
-- Backup to sg2 runs at 03:00 on Tue, Thu, and Sat
-- Backup to sg3 runs at 03:00 on Mon, Wed, and Fri
+| Job | Type | Destination | Schedule |
+|-----|------|-------------|----------|
+| Personal documents | rclone | Backblaze | 01:00 on Tue, Thu, Sat |
+| Personal documents | rclone | OneDrive | 01:00 on Mon, Wed, Fri |
+| Photos | rclone | Backblaze | 02:00 on Sun |
+| Photos | rclone | OneDrive | 01:00 on Sun |
+| sg1 → sg2 (NUC) | rsync | Local network | 03:00 on Tue, Thu, Sat |
+| sg1 → sg3 (local disk) | rsync | Local disk | 03:00 on Mon, Wed, Fri |
 
 ## Running a backup manually
 
