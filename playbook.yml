@@ -1,6 +1,6 @@
 ---
 - name: Deploy personal backup systemd units
-  hosts: all
+  hosts: micro.lan
   become: true
 
   pre_tasks:
