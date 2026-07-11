@@ -1,0 +1,7 @@
+---
+- name: Backup Podman volumes for all configured users
+  hosts: all
+  become: true
+
+  roles:
+    - podman-volume-backup

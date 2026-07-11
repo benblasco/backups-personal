@@ -1,3 +1,6 @@
 all:
   hosts:
     micro.lan:
+    nuc.lan:
+    opti.lan:
+    hex.lan:

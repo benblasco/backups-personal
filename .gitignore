@@ -1,3 +1,4 @@
 files/rclone.conf
 group_vars/all/*.yml
 !group_vars/all/*.yml.example
+group_vars/all/podman-volume-backup.yml

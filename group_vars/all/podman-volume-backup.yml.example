@@ -1,0 +1,10 @@
+---
+# Copy this file to podman-volume-backup.yml and adjust paths.
+# podman-volume-backup.yml is gitignored to keep site-specific paths out of version control.
+podman_backup_users:
+  - name: bblasco
+    backup_path: /var/backups/podman-volumes/bblasco
+  - name: media
+    backup_path: /var/backups/podman-volumes/media
+  - name: root
+    backup_path: /var/backups/podman-volumes/root

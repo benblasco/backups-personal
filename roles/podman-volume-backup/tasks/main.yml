@@ -1,0 +1,15 @@
+---
+- name: Ensure shared backup base directory exists
+  ansible.builtin.file:
+    path: "{{ podman_backup_base_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "1777"
+
+- name: Backup Podman volumes for each user
+  ansible.builtin.include_tasks: per_user.yml
+  loop: "{{ podman_backup_users }}"
+  loop_control:
+    loop_var: backup_user
+    label: "{{ backup_user.name }}"

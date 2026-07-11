@@ -1,0 +1,19 @@
+---
+# List of users whose Podman volumes should be backed up.
+# Each entry requires:
+#   name:        Linux username (or "root")
+#   backup_path: Absolute path where volume tarballs are written
+#
+# Example:
+#   podman_backup_users:
+#     - name: bblasco
+#       backup_path: /var/home/bblasco/podman-volume-backups
+#     - name: root
+#       backup_path: /root/podman-volume-backups
+podman_backup_users: []
+
+# Shared parent directory for all volume backups.
+podman_backup_base_path: "/var/backups/podman-volumes"
+
+# strftime format appended to each backup filename.
+podman_backup_timestamp_format: "%Y%m%d"
