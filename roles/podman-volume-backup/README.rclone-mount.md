@@ -12,7 +12,21 @@ However SSHFS is no longer maintained, as per the project [git page](https://git
 
 So, time to find a new solution.
 
-## New rclone mount setup
+## New rclone mount setup (with thanks to Google search with AI)
+
+**`rclone mount` is an excellent, modern replacement for `sshfs`** and handles network disconnections far more gracefully.
+
+Because `sshfs` operates as a direct network filesystem, any brief drop in internet connectivity usually causes the entire mount to freeze, hang your terminal, or throw hard "Input/output errors."
+
+`rclone` solves this by using an abstract **Virtual File System (VFS) layer with local caching**. If your internet drops, `rclone` keeps the local file system structure alive, queues your operations, and silently retries the connection in the background without crashing your application.
+
+### Why `rclone` Handles Disconnections Better
+
+- **VFS Cache Mode:** With caching enabled, apps read and write to your local disk first. If you lose connection while editing a file, you can keep saving it locally. `rclone` will upload it automatically once the network returns.
+- **Aggressive Retries:** `rclone` features built-in, low-level retry logic that constantly attempts to reconnect to the SFTP server without dropping the mount point.
+- **No Frozen Terminals:** Unlike `sshfs`, which often requires a forced lazy unmount (`umount -l`) after a network drop, `rclone` stays responsive.
+
+### Implementation
 
 First, we configure a new rclone remote as follows:
 
@@ -76,6 +90,8 @@ Key Flags for Graceful Reconnections
 - **`--vfs-refresh`**
     - *The Renewer:* Pre-loads the directory structure in the background on startup, making initial file browsing instant.
 
+- **`--daemon`**
+    - Tells rclone to launch the mount, hand control of the terminal back to you, and run quietly in the background.
 
 
 
