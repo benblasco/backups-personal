@@ -21,3 +21,24 @@ ansible-playbook -i inventory.yml playbook.yml
 - [Signal notifications](README.signal-notifications.md) — post-backup alerts via signal-cli REST API
 - [Android FolderSync app configuration](README.foldersync.md) — LAN permissions for FolderSync on Android
 - [Podman volume backup](README.podman-volume-backup.md) — export Podman volumes to timestamped tar archives
+
+## Development
+
+Install Python dev dependencies and Ansible collections, then enable pre-commit:
+
+```bash
+python3 -m pip install --user -r requirements-dev.txt
+ansible-galaxy collection install -r requirements.yml
+pre-commit install
+pre-commit run --all-files
+```
+
+Pre-commit runs: YAML checks (`check-yaml`, yamllint), **ansible-lint** on the repo, **systemd-analyze verify** on static units under `files/*.service` and `files/*.timer`, **gitleaks**, **shellcheck** (excluding Jinja `*.j2` templates), and **markdownlint-cli2** on Markdown.
+
+On RHEL or Fedora, confirm tooling is available:
+
+```bash
+pre-commit --version
+ansible-lint --version
+systemd-analyze --version
+```

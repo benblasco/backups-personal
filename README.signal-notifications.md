@@ -16,7 +16,7 @@ For full signal-cli REST API usage examples see the [official examples](https://
 
 The rclone notification script (`/var/usrlocal/bin/rclone-notify.sh`) reads the last 4 lines of the rclone log file — the stats summary block written at job completion — and sends them as the message body. Example message:
 
-```
+```text
 rclone-backblaze-personal: success | 2026/03/31 15:23:35 NOTICE:  Transferred: 0 B / 0 B, -, 0 B/s, ETA - Checks: 5314 / 5314, 100%, Listed 11387 Elapsed time: 40.9s
 ```
 
@@ -30,7 +30,7 @@ SERVICE_RESULT=test /var/usrlocal/bin/rclone-notify.sh rclone-backblaze-personal
 
 The rsync notification script (`/var/usrlocal/bin/rsync-notify.sh`) reads the last 2 lines of the service's journal output for the current invocation — the rsync transfer summary — and sends them as the message body. Example message:
 
-```
+```text
 rsync-sg2: success | sent 21.84M bytes  received 12 bytes  147.06K bytes/sec  total size is 1.83T  speedup is 83,727.42
 ```
 

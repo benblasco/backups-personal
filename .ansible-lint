@@ -1,0 +1,13 @@
+---
+profile: moderate
+exclude_paths:
+  - .cache/
+  - .git/
+  # Gitignored secret vars (long tokens/options); lint playbooks and examples instead.
+  - group_vars/all/
+
+write_list:
+  - none
+
+warn_list:
+  - experimental

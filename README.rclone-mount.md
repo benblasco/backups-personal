@@ -4,7 +4,7 @@
 
 I have been using SSHFS to mount a disk on my home server for years, using this command as a regular user:
 
-```
+```bash
 sshfs -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3 -p <server port> <server host>:/mnt/sg1 /mnt/sg1
 ```
 
@@ -46,8 +46,8 @@ use_insecure_cipher: false
 disable_hashcheck: false
 ssh: default (blank)
 
-```
-❯ more ~/.config/rclone/rclone.conf 
+```bash
+❯ more ~/.config/rclone/rclone.conf
 [home]
 type = sftp
 host = <server host>
@@ -65,7 +65,7 @@ As per some help from a google search with AI.
 
 To make rclone act like sshfs but with high fault tolerance, configure your SFTP remote using rclone config, and then run the following optimized mount command:
 
-```
+```bash
 rclone mount home:/var/mnt/sg1 /var/mnt/sg1 \
   --vfs-cache-mode full \
   --vfs-cache-max-age 2h \
