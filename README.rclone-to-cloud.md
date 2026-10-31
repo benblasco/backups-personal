@@ -40,15 +40,19 @@ Run as regular user `bblasco`.
 ### To Backblaze
 
 Photos:
-`rclone sync /var/mnt/sg1/media/photos/ backblaze:eraser215-photos/photos/ --log-file ~/rclone_logs/backblaze-photos.log --log-level=INFO --stats-log-level NOTICE`
+`rclone sync /var/mnt/sg1/media/photos/ backblaze:eraser215-photos/photos/ --log-file ~/rclone_logs/backblaze-photos.log
+--log-level=INFO --stats-log-level NOTICE`
 
 Documents:
-`rclone sync /var/mnt/sg1/eblaben_backup/personal/ backblaze:eraser215-personal/personal/ --log-file ~/rclone_logs/backblaze-personal.log --log-level=INFO --stats-log-level NOTICE`
+`rclone sync /var/mnt/sg1/eblaben_backup/personal/ backblaze:eraser215-personal/personal/ --log-file
+~/rclone_logs/backblaze-personal.log --log-level=INFO --stats-log-level NOTICE`
 
 ### To OneDrive
 
 Photos:
-`rclone sync /var/mnt/sg1/media/photos/ onedrive:rclone_backup/photos/ --log-file ~/rclone_logs/onedrive-photos.log --log-level=INFO --stats-log-level NOTICE`
+`rclone sync /var/mnt/sg1/media/photos/ onedrive:rclone_backup/photos/ --log-file ~/rclone_logs/onedrive-photos.log
+--log-level=INFO --stats-log-level NOTICE`
 
 Documents:
-`rclone sync /var/mnt/sg1/eblaben_backup/personal/ onedrive:rclone_backup/personal/ --log-file ~/rclone_logs/onedrive-personal.log --log-level=INFO --stats-log-level NOTICE`
+`rclone sync /var/mnt/sg1/eblaben_backup/personal/ onedrive:rclone_backup/personal/ --log-file
+~/rclone_logs/onedrive-personal.log --log-level=INFO --stats-log-level NOTICE`

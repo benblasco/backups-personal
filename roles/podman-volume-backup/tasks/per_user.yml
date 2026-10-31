@@ -1,27 +1,28 @@
 ---
-- name: "{{ backup_user.name }} | Look up UID"
+- name: Look up UID | {{ backup_user.name }}
   ansible.builtin.getent:
     database: passwd
     key: "{{ backup_user.name }}"
 
-- name: "{{ backup_user.name }} | Set UID fact"
+- name: Set UID fact | {{ backup_user.name }}
   ansible.builtin.set_fact:
     _backup_user_uid: "{{ ansible_facts.getent_passwd[backup_user.name][1] }}"
 
-- name: "{{ backup_user.name }} | Ensure backup directory exists"
+- name: Ensure backup directory exists | {{ backup_user.name }}
   ansible.builtin.file:
     path: "{{ backup_user.backup_path }}"
     state: directory
     owner: "{{ backup_user.name }}"
     mode: "0755"
 
-- name: "{{ backup_user.name }} | Generate backup timestamp"
+- name: Generate backup timestamp | {{ backup_user.name }}
   ansible.builtin.set_fact:
     _backup_timestamp: "{{ now(fmt=podman_backup_timestamp_format) }}"
 
-- name: "{{ backup_user.name }} | Gather Podman volume info"
-  containers.podman.podman_volume_info:
+- name: Gather Podman volume info | {{ backup_user.name }}
+  become: true
   become_user: "{{ backup_user.name }}"
+  containers.podman.podman_volume_info:
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ _backup_user_uid }}"
   register: _volume_info
@@ -29,29 +30,48 @@
 # Named volumes may omit the Anonymous key entirely; rejectattr/selectattr error
 # when the attribute is missing on any dict, so include those volumes explicitly
 # and union with volumes that have Anonymous: false.
-- name: "{{ backup_user.name }} | Select non-anonymous volumes"
+- name: Select non-anonymous volumes | {{ backup_user.name }}
   ansible.builtin.set_fact:
     _named_volumes: >-
       {{
         (_volume_info.volumes | default([]) | selectattr('Anonymous', 'undefined') | list)
-        + (_volume_info.volumes | default([]) | selectattr('Anonymous', 'defined') | selectattr('Anonymous', 'equalto', false) | list)
+        + (
+            _volume_info.volumes | default([])
+            | selectattr('Anonymous', 'defined')
+            | selectattr('Anonymous', 'equalto', false)
+            | list
+          )
       }}
 
 # Only Anonymous: true volumes are skipped; selectattr equalto errors on dicts
 # without the Anonymous key, so restrict to entries where it is defined.
-- name: "{{ backup_user.name }} | Report skipped anonymous volumes"
+- name: Report skipped anonymous volumes | {{ backup_user.name }}
   ansible.builtin.debug:
     msg: "Skipping anonymous volume {{ item.Name }}"
-  loop: "{{ _volume_info.volumes | default([]) | selectattr('Anonymous', 'defined') | selectattr('Anonymous', 'equalto', true) | list }}"
+  loop: >-
+    {{
+      _volume_info.volumes | default([])
+      | selectattr('Anonymous', 'defined')
+      | selectattr('Anonymous', 'equalto', true)
+      | list
+    }}
   loop_control:
     label: "{{ item.Name }}"
-  when: (_volume_info.volumes | default([]) | selectattr('Anonymous', 'defined') | selectattr('Anonymous', 'equalto', true) | list | length) > 0
+  when: >-
+    (
+      _volume_info.volumes | default([])
+      | selectattr('Anonymous', 'defined')
+      | selectattr('Anonymous', 'equalto', true)
+      | list
+      | length
+    ) > 0
 
-- name: "{{ backup_user.name }} | Export each volume"
+- name: Export each volume | {{ backup_user.name }}
+  become: true
+  become_user: "{{ backup_user.name }}"
   containers.podman.podman_export:
     volume: "{{ item.Name }}"
     dest: "{{ backup_user.backup_path }}/{{ item.Name }}-{{ _backup_timestamp }}.tar"
-  become_user: "{{ backup_user.name }}"
   environment:
     XDG_RUNTIME_DIR: "/run/user/{{ _backup_user_uid }}"
   loop: "{{ _named_volumes }}"

@@ -11,3 +11,6 @@ write_list:
 
 warn_list:
   - experimental
+
+skip_list:
+  - role-name

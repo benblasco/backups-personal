@@ -36,11 +36,8 @@
         group: bblasco
         mode: "0600"
 
-    # SELinux booleans to allow rsync full access due to the following denials:
-    # type=AVC msg=audit(1774503754.720:626798): avc:  denied  { getattr } for  pid=362824 comm="rsync" path="/var/mnt/sg2" dev="0:77" ino=2 scontext=system_u:system_r:rsync_t:s0 tcontext=system_u:object_r:nfs_t:s0 tclass=dir permissive=0
-    # type=AVC msg=audit(1774503754.715:626794): avc:  denied  { search } for  pid=362822 comm="rsync" name="bblasco" dev="dm-5" ino=16777344 scontext=system_u:system_r:rsync_t:s0 tcontext=unconfined_u:object_r:user_home_dir_t:s0 tclass=dir permissive=0
-    # Note: These were found via the following command:
-    # sudo ausearch -m avc -ts recent | audit2why
+    # SELinux booleans to allow rsync full access due to AVC denials (rsync_t vs nfs_t,
+    # user_home_dir_t). Example: sudo ausearch -m avc -ts recent | audit2why
     - name: Set SELinux boolean to allow rsync full access
       ansible.posix.seboolean:
         name: rsync_full_access

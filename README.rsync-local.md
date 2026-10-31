@@ -1,6 +1,7 @@
 # Rsync to local destinations
 
-Local rsync backups run as systemd system units as `root`. Each job ensures that `sg1`, `sg2`, and `sg3` are all mounted before running.
+Local rsync backups run as systemd system units as `root`. Each job ensures that `sg1`, `sg2`, and `sg3` are all mounted
+before running.
 
 ## Schedule
 
@@ -38,11 +39,13 @@ See [Signal notifications](README.signal-notifications.md#rsync) for setup, mess
 
 ## SELinux requirements
 
-The rsync services run as root in the `rsync_t` SELinux domain. Two SELinux configurations are required and are applied automatically by the playbook.
+The rsync services run as root in the `rsync_t` SELinux domain. Two SELinux configurations are required and are applied
+automatically by the playbook.
 
 ### Boolean: `rsync_full_access`
 
-The rsync services access NFS-mounted paths (`/var/mnt/sg2/`) and files in a user home directory. Without this boolean, SELinux denies rsync the ability to access NFS mounts and traverse the home directory tree.
+The rsync services access NFS-mounted paths (`/var/mnt/sg2/`) and files in a user home directory. Without this boolean,
+SELinux denies rsync the ability to access NFS mounts and traverse the home directory tree.
 
 ```bash
 setsebool -P rsync_full_access 1
@@ -50,9 +53,13 @@ setsebool -P rsync_full_access 1
 
 ### Custom policy module: `rsync-dac-override`
 
-The source files on sg1 are owned by `bblasco`. When rsync (running as root in `rsync_t`) creates matching directories on the destination it must bypass DAC (Discretionary Access Control) ownership checks, which requires the `dac_override` capability. This is not covered by any boolean and requires a custom SELinux policy module.
+The source files on sg1 are owned by `bblasco`. When rsync (running as root in `rsync_t`) creates matching directories
+on the destination it must bypass DAC (Discretionary Access Control) ownership checks, which requires the `dac_override`
+capability. This is not covered by any boolean and requires a custom SELinux policy module.
 
-The module source lives at `files/rsync-dac-override.te` and is compiled and loaded by the playbook using `checkmodule` and `semodule_package` from the `checkpolicy` and `policycoreutils` packages. Both packages must be present on the system before running the playbook — on a bootc image they should be baked in, as they cannot be installed at runtime.
+The module source lives at `files/rsync-dac-override.te` and is compiled and loaded by the playbook using `checkmodule`
+and `semodule_package` from the `checkpolicy` and `policycoreutils` packages. Both packages must be present on the
+system before running the playbook — on a bootc image they should be baked in, as they cannot be installed at runtime.
 
 To inspect or rebuild the module manually:
 
